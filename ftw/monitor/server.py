@@ -1,3 +1,4 @@
+from App.config import getConfiguration
 from zope.component import getUtilitiesFor
 import time
 import zc.monitor
@@ -6,14 +7,22 @@ import ZODB.interfaces
 import zope.component
 
 
-MONITOR_PORT = 8888
-
-
 def initialize_monitor_server(opened_event):
     """Event handler for IDatabaseOpenedWithRoot that starts the monitor
     server on instance startup.
     """
-    start_server(MONITOR_PORT, opened_event.database)
+    monitor_port = determine_monitor_port()
+    start_server(monitor_port, opened_event.database)
+
+
+def determine_monitor_port():
+    """Determine the monitor ported based on the instance's base port.
+    """
+    config = getConfiguration()
+    assert len(config.servers) == 1
+    server = config.servers[0]
+    monitor_port = int(server.server_port) + 80
+    return monitor_port
 
 
 def register_db(db):

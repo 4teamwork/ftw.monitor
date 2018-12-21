@@ -1,3 +1,5 @@
+from App.config import getConfiguration
+from ftw.monitor.server import determine_monitor_port
 from ftw.monitor.server import start_server
 from ftw.monitor.server import stop_server
 from ftw.monitor.testing import MONITOR_INTEGRATION_TESTING
@@ -43,3 +45,25 @@ class TestMonitorServer(TestCase):
             self.assertEqual("Error: Database 'testing' disconnected.\n", reply)
         finally:
             delattr(db._storage, 'is_connected')
+
+
+class TestMonitorServerPort(TestCase):
+
+    layer = MONITOR_INTEGRATION_TESTING
+
+    def setUp(self):
+        self.base_port = 10101
+
+        class Server(object):
+            server_port = self.base_port
+
+        config = getConfiguration()
+        config.servers = [Server()]
+
+    def tearDown(self):
+        config = getConfiguration()
+        delattr(config, 'servers')
+
+    def test_monitor_server_port_is_based_on_instance_port(self):
+        monitor_port = determine_monitor_port()
+        self.assertEqual(self.base_port + 80, monitor_port)
