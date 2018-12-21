@@ -10,6 +10,7 @@
       />
 
   <include package="zc.z3monitor" />
+  <include package=".browser" />
 
   <utility
       component=".health.health_check"

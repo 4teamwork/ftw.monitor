@@ -1,3 +1,4 @@
+from ftw.monitor.browser import warmup
 from Zope2 import app as App  # noqa
 
 
@@ -22,6 +23,10 @@ def health_check(connection):
                 connection.write("Error: Database %r disconnected.\n" % dbname)
     finally:
         app._p_jar.close()
+
+    if warmup.warmup_in_progress:
+        ok = False
+        connection.write("Warmup in progress\n")
 
     if ok:
         connection.write('OK\n')

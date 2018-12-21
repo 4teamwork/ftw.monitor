@@ -5,6 +5,7 @@ version = '1.0.0.dev0'
 
 tests_require = [
     'ftw.testing',
+    'ftw.testbrowser',
     'plone.app.testing',
     'plone.testing',
 ]
@@ -46,6 +47,7 @@ setup(
     install_requires=[
         'Plone',
         'setuptools',
+        'plone.api',
         'zc.monitor',
         'zc.z3monitor',
         'ZODB3',
