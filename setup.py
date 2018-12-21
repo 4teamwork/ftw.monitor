@@ -46,6 +46,11 @@ setup(
     install_requires=[
         'Plone',
         'setuptools',
+        'zc.monitor',
+        'zc.z3monitor',
+        'ZODB3',
+        'zope.component',
+        'zope.processlifetime'
     ],
 
     tests_require=tests_require,

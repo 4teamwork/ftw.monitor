@@ -9,4 +9,17 @@
       initialize=".initialize"
       />
 
+  <include package="zc.z3monitor" />
+
+  <utility
+      component=".health.health_check"
+      provides="zc.z3monitor.interfaces.IZ3MonitorPlugin"
+      name="health_check"
+      />
+
+  <subscriber
+      for="zope.processlifetime.IDatabaseOpenedWithRoot"
+      handler=".server.initialize_monitor_server"
+      />
+
 </configure>
