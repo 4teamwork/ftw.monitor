@@ -1,5 +1,6 @@
 from App.config import getConfiguration
 from zope.component import getUtilitiesFor
+from ZServer.medusa.http_server import http_server
 import time
 import zc.monitor
 import ZODB.ActivityMonitor
@@ -15,13 +16,28 @@ def initialize_monitor_server(opened_event):
     start_server(monitor_port, opened_event.database)
 
 
-def determine_monitor_port():
+def determine_base_port(config=None):
+    """Determine the HTTP instance's port.
+    """
+    if config is None:
+        config = getConfiguration()
+
+    # Filter out any non-ZServer servers, like taskqueue servers
+    zservers = filter(
+        lambda s: isinstance(s, http_server),
+        config.servers)
+    assert len(zservers) == 1
+
+    server = zservers[0]
+    base_port = server.server_port
+    return int(base_port)
+
+
+def determine_monitor_port(config=None):
     """Determine the monitor ported based on the instance's base port.
     """
-    config = getConfiguration()
-    assert len(config.servers) == 1
-    server = config.servers[0]
-    monitor_port = int(server.server_port) + 80
+    base_port = determine_base_port(config)
+    monitor_port = base_port + 80
     return monitor_port
 
 
