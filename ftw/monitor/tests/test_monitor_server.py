@@ -4,6 +4,7 @@ from ftw.monitor.server import start_server
 from ftw.monitor.server import stop_server
 from ftw.monitor.testing import MONITOR_INTEGRATION_TESTING
 from unittest2 import TestCase
+from ZServer.datatypes import HTTPServerFactory
 from ZServer.medusa.http_server import http_server
 import socket
 
@@ -59,6 +60,15 @@ class HTTPServerStub(http_server):
         self.server_port = 10101
 
 
+class HTTPServerFactoryStub(HTTPServerFactory):
+    """A HTTPServerFactory derived class that should be picked as the server
+    to base our monitor port on if invoked via bin/instance monitor.
+    """
+
+    def __init__(self, *args, **kwargs):
+        self.port = 10101
+
+
 class OtherServerStub(object):
     """Simulates some other kind of server we must ignore.
     """
@@ -77,6 +87,13 @@ class TestMonitorServerPort(TestCase):
     def test_monitor_server_port_is_based_on_instance_port(self):
         config = getConfiguration()
         config.servers = [OtherServerStub(), HTTPServerStub()]
+
+        monitor_port = determine_monitor_port()
+        self.assertEqual(10101 + 80, monitor_port)
+
+    def test_monitor_server_port_can_be_determined_from_http_server_factory(self):
+        config = getConfiguration()
+        config.servers = [OtherServerStub(), HTTPServerFactoryStub()]
 
         monitor_port = determine_monitor_port()
         self.assertEqual(10101 + 80, monitor_port)

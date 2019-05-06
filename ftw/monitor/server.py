@@ -1,5 +1,6 @@
 from App.config import getConfiguration
 from zope.component import getUtilitiesFor
+from ZServer.datatypes import HTTPServerFactory
 from ZServer.medusa.http_server import http_server
 import time
 import zc.monitor
@@ -24,12 +25,21 @@ def determine_base_port(config=None):
 
     # Filter out any non-ZServer servers, like taskqueue servers
     zservers = filter(
-        lambda s: isinstance(s, http_server),
+        lambda s: isinstance(s, (http_server, HTTPServerFactory)),
         config.servers)
     assert len(zservers) == 1
 
+    # During normal instance startup, we'll have instantiated `http_server`
+    # components in config.servers. When invoked via bin/instance monitor
+    # however, these components will not have been instantiated, and
+    # config.servers will contain HTTPServerFactory's instead (which have a
+    # `port` attribute instead of `server_port`).
     server = zservers[0]
-    base_port = server.server_port
+    if isinstance(server, http_server):
+        base_port = server.server_port
+    elif isinstance(server, HTTPServerFactory):
+        base_port = server.port
+
     return int(base_port)
 
 

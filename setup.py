@@ -62,5 +62,8 @@ setup(
     # -*- Entry points: -*-
     [z3c.autoinclude.plugin]
     target = plone
+
+    [plone.recipe.zope2instance.ctl]
+    monitor = ftw.monitor.command:monitor
     """,
 )
