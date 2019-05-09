@@ -5,6 +5,13 @@
     i18n_domain="ftw.monitor">
 
   <browser:page
+      for="OFS.interfaces.IApplication"
+      name="warmup"
+      class=".warmup.WarmupView"
+      permission="zope2.Public"
+      />
+
+  <browser:page
       for="Products.CMFPlone.interfaces.IPloneSiteRoot"
       name="warmup"
       class=".warmup.WarmupView"

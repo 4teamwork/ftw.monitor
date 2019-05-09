@@ -4,6 +4,7 @@ from Products.CMFPlone.interfaces import IPloneSiteRoot
 from Products.Five.browser import BrowserView
 from zope.component import adapter
 from zope.component import getMultiAdapter
+from zope.component.hooks import setSite
 from zope.interface import implementer
 from zope.publisher.interfaces.browser import IBrowserRequest
 import logging
@@ -58,7 +59,7 @@ class DefaultWarmupPerformer(object):
 
 
 class WarmupView(BrowserView):
-    """View to warm up a Plone instance.
+    """Warm up a single Plone site or all Plone sites in a Zope instance.
     """
 
     def __call__(self):
@@ -77,7 +78,19 @@ class WarmupView(BrowserView):
         return result
 
     def warmup(self):
-        warmup_performer = getMultiAdapter(
-            (self.context, self.context.REQUEST), IWarmupPerformer)
-        warmup_performer.perform()
+        if IPloneSiteRoot.providedBy(self.context):
+            # Invoked on Plone Site
+            self.warmup_plone(self.context)
+        else:
+            # Invoked on Zope Application root
+            app = self.context
+            for obj in app.objectValues():
+                if IPloneSiteRoot.providedBy(obj):
+                    setSite(obj)
+                    self.warmup_plone(obj)
         return 'OK'
+
+    def warmup_plone(self, site):
+        warmup_performer = getMultiAdapter(
+            (site, site.REQUEST), IWarmupPerformer)
+        warmup_performer.perform()
