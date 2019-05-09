@@ -23,23 +23,20 @@ def determine_base_port(config=None):
     if config is None:
         config = getConfiguration()
 
-    # Filter out any non-ZServer servers, like taskqueue servers
-    zservers = filter(
-        lambda s: isinstance(s, (http_server, HTTPServerFactory)),
-        config.servers)
-    assert len(zservers) == 1
-
     # During normal instance startup, we'll have instantiated `http_server`
     # components in config.servers. When invoked via bin/instance monitor
     # however, these components will not have been instantiated, and
-    # config.servers will contain HTTPServerFactory's instead (which have a
-    # `port` attribute instead of `server_port`).
-    server = zservers[0]
-    if isinstance(server, http_server):
-        base_port = server.server_port
-    elif isinstance(server, HTTPServerFactory):
-        base_port = server.port
+    # config.servers will contain HTTPServerFactory's instead.
 
+    # Also, filter out any non-ZServer servers, like taskqueue servers
+    zservers = [
+        server for server in config.servers
+        if isinstance(server, (http_server, HTTPServerFactory))
+    ]
+    assert len(zservers) == 1
+
+    server = zservers[0]
+    base_port = server.port
     return int(base_port)
 
 

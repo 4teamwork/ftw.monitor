@@ -80,7 +80,7 @@ class HTTPServerStub(http_server):
     def __init__(self, *args, **kwargs):
         """Stub out http_server.__init__ - don't open sockets.
         """
-        self.server_port = 10101
+        self.port = 10101
 
 
 class HTTPServerFactoryStub(HTTPServerFactory):
@@ -96,7 +96,7 @@ class OtherServerStub(object):
     """Simulates some other kind of server we must ignore.
     """
 
-    server_port = 7777
+    port = 7777
 
 
 class TestMonitorServerPort(TestCase):
