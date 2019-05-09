@@ -9,6 +9,24 @@ from ZServer.medusa.http_server import http_server
 import socket
 
 
+class WarmupInProgress(object):
+    """Context manager to reversibly monkey patch the warmup_in_progress flag.
+    """
+
+    def __init__(self, value):
+        self.value = value
+
+    def __enter__(self):
+        from ftw.monitor.browser import warmup
+        self._original_value = warmup.warmup_in_progress
+        warmup.warmup_in_progress = self.value
+        return self
+
+    def __exit__(self, exc_type, exc_value, tb):
+        from ftw.monitor.browser import warmup
+        warmup.warmup_in_progress = self._original_value
+
+
 class TestMonitorServer(TestCase):
 
     layer = MONITOR_INTEGRATION_TESTING
@@ -47,6 +65,11 @@ class TestMonitorServer(TestCase):
             self.assertEqual("Error: Database 'testing' disconnected.\n", reply)
         finally:
             delattr(db._storage, 'is_connected')
+
+    def test_health_check_fails_if_warmup_in_progress(self):
+        with WarmupInProgress(True):
+            reply = self.send('127.0.0.1', 7777, 'health_check\r\n')
+        self.assertEqual('Warmup in progress\n', reply)
 
 
 class HTTPServerStub(http_server):
