@@ -1,6 +1,3 @@
-.. contents:: Table of Contents
-
-
 Introduction
 ============
 
@@ -15,6 +12,9 @@ completly relies on **autoconfiguration**. No product-config or ZCML is needed,
 the monitor port will always be picked automatically based on the instance's base port:
 
 ``monitor_port = instance_port + 80``
+
+
+.. contents:: Table of Contents
 
 
 Compatibility
