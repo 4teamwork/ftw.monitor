@@ -14,10 +14,10 @@ class TestWarmup(TestCase):
     @browsing
     def test_warmup_view_on_plone_site(self, browser):
         browser.open(self.portal, view='@@warmup')
-        self.assertEqual('OK', browser.contents)
+        self.assertEqual('Warmup successful', browser.contents)
 
     @browsing
     def test_warmup_view_on_zope_app_root(self, browser):
         app = aq_parent(self.portal)
         browser.open(app, view='@@warmup')
-        self.assertEqual('OK', browser.contents)
+        self.assertEqual('Warmup successful', browser.contents)

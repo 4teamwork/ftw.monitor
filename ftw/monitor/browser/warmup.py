@@ -88,7 +88,7 @@ class WarmupView(BrowserView):
                 if IPloneSiteRoot.providedBy(obj):
                     setSite(obj)
                     self.warmup_plone(obj)
-        return 'OK'
+        return 'Warmup successful'
 
     def warmup_plone(self, site):
         warmup_performer = getMultiAdapter(
