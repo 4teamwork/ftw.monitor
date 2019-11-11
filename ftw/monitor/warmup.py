@@ -9,9 +9,36 @@ import logging
 log = logging.getLogger('ftw.monitor')
 
 # Keep track of the instance's warmup state.
+#
+# These two flags are not "thread-safe" in the sense that they are global,
+# interpreter-wide state. For Zope instances with more than one thread they
+# therefore don't track state accurately: If warmup happens in multiple
+# threads, the first thread that finishes will set the flags to the "done"
+# state, even though other threads are still warming up.
+
 instance_warmup_state = {
+    'done': False,
     'in_progress': False,
 }
+
+
+def warmup_state(connection):
+    r"""Get instance warmup state.
+
+    IZ3MonitorPlugin to report the warmup state of the instance in a machine
+    readable form.
+
+    Usage: Send the message 'warmup_state\r\n' to the zc.monitor TCP port.
+    The plugin will then respond with a single line containing two
+    space-delimited integers:
+
+    - done (whether a warmup has been performed at least once)
+    - in_progress (whether a warmup is currently being performed)
+    """
+    state = "%s %s\n" % (
+        int(instance_warmup_state['done']),
+        int(instance_warmup_state['in_progress']))
+    connection.write(state)
 
 
 @implementer(IWarmupPerformer)

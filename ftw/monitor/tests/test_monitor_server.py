@@ -25,6 +25,7 @@ class WarmupInProgress(object):
     def __exit__(self, exc_type, exc_value, tb):
         from ftw.monitor.warmup import instance_warmup_state
         instance_warmup_state['in_progress'] = self._original_value
+        instance_warmup_state['done'] = True
 
 
 class TestMonitorServer(TestCase):

@@ -22,6 +22,12 @@
       name="health_check"
       />
 
+  <utility
+      component=".warmup.warmup_state"
+      provides="zc.z3monitor.interfaces.IZ3MonitorPlugin"
+      name="warmup_state"
+      />
+
   <subscriber
       for="zope.processlifetime.IDatabaseOpenedWithRoot"
       handler=".server.initialize_monitor_server"
