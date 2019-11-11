@@ -2,6 +2,7 @@ from Acquisition import aq_parent
 from App.config import getConfiguration
 from collections import namedtuple
 from ftw.monitor.autowarmup import autowarmup
+from ftw.monitor.autowarmup import autowarmup_enabled
 from ftw.monitor.server import initialize_monitor_server
 from ftw.monitor.server import stop_server
 from ftw.monitor.testing import HTTPServerStub
@@ -14,6 +15,7 @@ from ftw.monitor.warmup import instance_warmup_state
 from ftw.testbrowser import browsing
 from unittest2 import TestCase
 from zope.processlifetime import DatabaseOpenedWithRoot
+import os
 
 
 WarmupState = namedtuple('WarmupState', ['done', 'in_progress'])
@@ -91,3 +93,19 @@ class TestAutoWarmupOnServerInitialization(TestCase, TCPHelper):
             return warmup_state
 
         self.wait_for(fetch_warmup_state, WarmupState(done=1, in_progress=0), 5.0)
+
+
+class TestAutoWarmupControl(TestCase):
+
+    def setUp(self):
+        os.environ.pop('FTW_MONITOR_AUTOWARMUP', None)
+
+    def tearDown(self):
+        os.environ.pop('FTW_MONITOR_AUTOWARMUP', None)
+
+    def test_autowarmup_is_enabled_by_default(self):
+        self.assertTrue(autowarmup_enabled())
+
+    def test_autowarmup_can_be_disabled_via_env_var(self):
+        os.environ['FTW_MONITOR_AUTOWARMUP'] = 'false'
+        self.assertFalse(autowarmup_enabled())

@@ -1,4 +1,5 @@
 import logging
+import os
 import requests
 import threading
 
@@ -44,3 +45,10 @@ def trigger_warmup(port):
     response = requests.get(url, timeout=(connect_timeout, read_timeout))
     log.info("Warmup response: %r (%r)" % (response, response.content))
     log.info("Autowarmup request finished.")
+
+
+def autowarmup_enabled():
+    """Determine whether autowarmup is enabled.
+    """
+    env_flag = os.environ.get('FTW_MONITOR_AUTOWARMUP', 'true')
+    return env_flag.lower() not in ('0', 'false', 'no', 'off')
