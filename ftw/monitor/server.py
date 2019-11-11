@@ -1,4 +1,5 @@
 from App.config import getConfiguration
+from ftw.monitor.autowarmup import autowarmup
 from zope.component import getUtilitiesFor
 from ZServer.datatypes import HTTPServerFactory
 from ZServer.medusa.http_server import http_server
@@ -15,6 +16,10 @@ def initialize_monitor_server(opened_event):
     """
     monitor_port = determine_monitor_port()
     start_server(monitor_port, opened_event.database)
+
+    # Trigger warmup for this instance (without blocking startup)
+    base_port = determine_base_port()
+    autowarmup(base_port)
 
 
 def determine_base_port(config=None):
