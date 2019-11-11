@@ -1,4 +1,4 @@
-from ftw.monitor.browser import warmup
+from ftw.monitor.warmup import instance_warmup_state
 from Zope2 import app as App  # noqa
 
 
@@ -24,7 +24,7 @@ def health_check(connection):
     finally:
         app._p_jar.close()
 
-    if warmup.warmup_in_progress:
+    if instance_warmup_state['in_progress']:
         ok = False
         connection.write("Warmup in progress\n")
 

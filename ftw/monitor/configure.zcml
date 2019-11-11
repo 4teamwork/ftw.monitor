@@ -12,10 +12,20 @@
   <include package="zc.z3monitor" />
   <include package=".browser" />
 
+  <adapter
+      factory=".warmup.DefaultWarmupPerformer"
+      />
+
   <utility
       component=".health.health_check"
       provides="zc.z3monitor.interfaces.IZ3MonitorPlugin"
       name="health_check"
+      />
+
+  <utility
+      component=".warmup.warmup_state"
+      provides="zc.z3monitor.interfaces.IZ3MonitorPlugin"
+      name="warmup_state"
       />
 
   <subscriber
