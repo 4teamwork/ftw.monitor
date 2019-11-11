@@ -15,40 +15,73 @@ def initialize_monitor_server(opened_event):
     server on instance startup.
     """
     monitor_port = determine_monitor_port()
-    start_server(monitor_port, opened_event.database)
+    if monitor_port:
+        start_server(monitor_port, opened_event.database)
 
     # Trigger warmup for this instance (without blocking startup)
     base_port = determine_base_port()
-    autowarmup(base_port)
+    if base_port:
+        autowarmup(base_port)
 
 
-def determine_base_port(config=None):
+def determine_base_port(config=None, consider_factories=False):
     """Determine the HTTP instance's port.
     """
     if config is None:
         config = getConfiguration()
 
     # During normal instance startup, we'll have instantiated `http_server`
-    # components in config.servers. When invoked via bin/instance monitor
-    # however, these components will not have been instantiated, and
-    # config.servers will contain HTTPServerFactory's instead.
-
-    # Also, filter out any non-ZServer servers, like taskqueue servers
+    # components in config.servers, and that's were we get the base port of
+    # the running HTTP server from.
+    #
+    # When we encounter HTTPServerFactory's instead of their instantiation,
+    # it means that the instance was invoked in a mode that does NOT start
+    # the HTTP server(s) defined in zope.conf. These are for example:
+    #
+    # - bin/instance run <script>
+    # - bin/instance debug
+    # - bin/instance <zopectl_cmd>
+    #
+    # In most of these cases we'll want to avoid attempting to launch a
+    # monitor server (and trigger a warmup request), and will therefore
+    # return `None` for the base port.
+    #
+    # Also, we filter out any non-ZServer servers, like taskqueue servers
     zservers = [
         server for server in config.servers
-        if isinstance(server, (http_server, HTTPServerFactory))
+        if isinstance(server, http_server)
     ]
-    assert len(zservers) == 1
+
+    if consider_factories:
+        # The exception to the above is the "bin/instance monitor" command:
+        # From this command we want to talk to the already running monitor
+        # server over TCP - we're not launching a new one. In that case we
+        # therefore *do* consider server factories, to be able to determine
+        # the port of the monitor server already running in a different
+        # process of the same instance.
+        zservers += [
+            server for server in config.servers
+            if isinstance(server, HTTPServerFactory)]
+
+    assert len(zservers) in (0, 1)
+
+    if not zservers:
+        return None
 
     server = zservers[0]
     base_port = server.port
     return int(base_port)
 
 
-def determine_monitor_port(config=None):
+def determine_monitor_port(config=None, consider_factories=False):
     """Determine the monitor ported based on the instance's base port.
     """
-    base_port = determine_base_port(config)
+    base_port = determine_base_port(config=config,
+                                    consider_factories=consider_factories)
+
+    if not base_port:
+        return None
+
     monitor_port = base_port + 80
     return monitor_port
 

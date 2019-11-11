@@ -62,8 +62,15 @@ class TestMonitorServerPort(TestCase):
         config = getConfiguration()
         config.servers = [OtherServerStub(), HTTPServerFactoryStub()]
 
-        monitor_port = determine_monitor_port()
+        monitor_port = determine_monitor_port(consider_factories=True)
         self.assertEqual(10101 + 80, monitor_port)
+
+    def test_http_server_factories_are_not_considered_by_default(self):
+        config = getConfiguration()
+        config.servers = [OtherServerStub(), HTTPServerFactoryStub()]
+
+        monitor_port = determine_monitor_port()
+        self.assertIsNone(monitor_port)
 
 
 class TestMonitorStartup(TestCase, TCPHelper):
