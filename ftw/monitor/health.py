@@ -11,22 +11,29 @@ def health_check(connection):
     Usage: Send the message 'health_check\r\n' to the zc.monitor TCP port.
     If the instance is healthy, the plugin responds with 'OK\n'.
     """
-    ok = True
     app = App()
+
+    def green():
+        """Signal healthy status.
+        """
+        connection.write('OK\n')
+
+    def red(msg):
+        """Signal unhealthy status (with a message describing why).
+        """
+        connection.write('%s\n' % msg)
+
     try:
         dbchooser = app.Control_Panel.Database
         for dbname in dbchooser.getDatabaseNames():
             storage = dbchooser[dbname]._getDB()._storage
             is_connected = getattr(storage, 'is_connected', None)
             if is_connected is not None and not is_connected():
-                ok = False
-                connection.write("Error: Database %r disconnected.\n" % dbname)
+                return red('Error: Database %r disconnected.' % dbname)
     finally:
         app._p_jar.close()
 
     if instance_warmup_state['in_progress']:
-        ok = False
-        connection.write("Warmup in progress\n")
+        return red('Warmup in progress')
 
-    if ok:
-        connection.write('OK\n')
+    return green()
