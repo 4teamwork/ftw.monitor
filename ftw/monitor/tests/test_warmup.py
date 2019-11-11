@@ -1,17 +1,13 @@
 from Acquisition import aq_parent
 from ftw.monitor.testing import MONITOR_INTEGRATION_TESTING
+from ftw.monitor.testing import MonitorTestCase
 from ftw.monitor.warmup import instance_warmup_state
 from ftw.testbrowser import browsing
-from unittest2 import TestCase
 
 
-class TestWarmup(TestCase):
+class TestWarmup(MonitorTestCase):
 
     layer = MONITOR_INTEGRATION_TESTING
-
-    def setUp(self):
-        self.portal = self.layer['portal']
-        instance_warmup_state['done'] = False
 
     @browsing
     def test_warmup_view_on_plone_site(self, browser):
