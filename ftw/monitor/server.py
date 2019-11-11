@@ -11,10 +11,23 @@ import ZODB.interfaces
 import zope.component
 
 
+startup_time = None
+
+
+def get_uptime():
+    global startup_time
+    if startup_time is None:
+        return 0
+    return time.time() - startup_time
+
+
 def initialize_monitor_server(opened_event):
     """Event handler for IDatabaseOpenedWithRoot that starts the monitor
     server on instance startup.
     """
+    global startup_time
+    startup_time = time.time()
+
     monitor_port = determine_monitor_port()
     if monitor_port:
         start_server(monitor_port, opened_event.database)

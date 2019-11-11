@@ -1,5 +1,13 @@
+from ftw.monitor.autowarmup import autowarmup_enabled
+from ftw.monitor.server import get_uptime
 from ftw.monitor.warmup import instance_warmup_state
 from Zope2 import app as App  # noqa
+
+
+# For this long after instance start the health check won't turn green,
+# unless wqe get a positive indication that warmup has been performed.
+# (This is to avoid status flickering during startup).
+STARTSECS = 20
 
 
 def health_check(connection):
@@ -12,6 +20,7 @@ def health_check(connection):
     If the instance is healthy, the plugin responds with 'OK\n'.
     """
     app = App()
+    uptime = get_uptime()
 
     def green():
         """Signal healthy status.
@@ -32,6 +41,13 @@ def health_check(connection):
                 return red('Error: Database %r disconnected.' % dbname)
     finally:
         app._p_jar.close()
+
+    # Avoid flickering status on startup (briefly turning green because
+    # monitor server was started, but warmup hasn't been triggered yet)
+    if uptime < STARTSECS and autowarmup_enabled():
+        if not (instance_warmup_state['in_progress'] or
+                instance_warmup_state['done']):
+            return red('Instance is booting')
 
     if instance_warmup_state['in_progress']:
         return red('Warmup in progress')
