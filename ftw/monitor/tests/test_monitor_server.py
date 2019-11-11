@@ -10,21 +10,21 @@ import socket
 
 
 class WarmupInProgress(object):
-    """Context manager to reversibly monkey patch the warmup_in_progress flag.
+    """Context manager to reversibly monkey patch the warmup in_progress flag.
     """
 
     def __init__(self, value):
         self.value = value
 
     def __enter__(self):
-        from ftw.monitor.browser import warmup
-        self._original_value = warmup.warmup_in_progress
-        warmup.warmup_in_progress = self.value
+        from ftw.monitor.warmup import instance_warmup_state
+        self._original_value = instance_warmup_state['in_progress']
+        instance_warmup_state['in_progress'] = self.value
         return self
 
     def __exit__(self, exc_type, exc_value, tb):
-        from ftw.monitor.browser import warmup
-        warmup.warmup_in_progress = self._original_value
+        from ftw.monitor.warmup import instance_warmup_state
+        instance_warmup_state['in_progress'] = self._original_value
 
 
 class TestMonitorServer(TestCase):

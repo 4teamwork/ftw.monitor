@@ -18,8 +18,4 @@
       permission="zope2.Public"
       />
 
-  <adapter
-      factory=".warmup.DefaultWarmupPerformer"
-      />
-
 </configure>
