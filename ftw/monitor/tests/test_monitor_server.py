@@ -1,12 +1,18 @@
 from App.config import getConfiguration
 from ftw.monitor.server import determine_monitor_port
+from ftw.monitor.server import initialize_monitor_server
+from ftw.monitor.server import stop_server
 from ftw.monitor.testing import HTTPServerFactoryStub
 from ftw.monitor.testing import HTTPServerStub
 from ftw.monitor.testing import MONITOR_INTEGRATION_TESTING
+from ftw.monitor.testing import MONITOR_ZSERVER_TESTING
 from ftw.monitor.testing import MonitorTestCase
 from ftw.monitor.testing import OtherServerStub
+from ftw.monitor.testing import TCPHelper
+from ftw.monitor.testing import wait_for_warmup_threads_to_finish
 from ftw.monitor.testing import WarmupInProgress
 from unittest2 import TestCase
+from zope.processlifetime import DatabaseOpenedWithRoot
 
 
 class TestMonitorServer(MonitorTestCase):
@@ -58,3 +64,28 @@ class TestMonitorServerPort(TestCase):
 
         monitor_port = determine_monitor_port()
         self.assertEqual(10101 + 80, monitor_port)
+
+
+class TestMonitorStartup(TestCase, TCPHelper):
+
+    layer = MONITOR_ZSERVER_TESTING
+
+    def tearDown(self):
+        wait_for_warmup_threads_to_finish()
+        stop_server()
+
+        config = getConfiguration()
+        delattr(config, 'servers')
+
+    def test_monitor_starts_up_on_initialization(self):
+        zserver_port = self.layer['port']
+        config = getConfiguration()
+        config.servers = [HTTPServerStub(port=zserver_port)]
+
+        db = self.layer['portal']._p_jar.db()
+        event = DatabaseOpenedWithRoot(db)
+        initialize_monitor_server(event)
+
+        expected_monitor_port = zserver_port + 80
+        reply = self.send('127.0.0.1', expected_monitor_port, 'health_check\r\n')
+        self.assertEqual('OK\n', reply)

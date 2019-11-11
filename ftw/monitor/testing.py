@@ -4,12 +4,15 @@ from ftw.monitor.warmup import instance_warmup_state
 from plone.app.testing import IntegrationTesting
 from plone.app.testing import PLONE_FIXTURE
 from plone.app.testing import PloneSandboxLayer
+from plone.app.testing.layers import FunctionalTesting
 from plone.testing import z2
 from unittest2 import TestCase
 from zope.configuration import xmlconfig
 from ZServer.datatypes import HTTPServerFactory
 from ZServer.medusa.http_server import http_server
 import socket
+import threading
+import time
 
 
 class MonitorLayer(PloneSandboxLayer):
@@ -42,6 +45,41 @@ class TCPHelper(object):
         sock.close()
         return data
 
+    def wait_for(self, func, expected_return_value, timeout):
+        """Test assertion method to repeatedly call a function until it
+        returns the expected value, or fail if the timeout is exceeded.
+        """
+        start = time.time()
+        while not time.time() - start > timeout:
+            result = func()
+            if result == expected_return_value:
+                return result
+            time.sleep(0.1)
+
+        msg = ("Exceeded timeout of %rs while waiting for %r to return %r. "
+               "Last returned value was %r" % (
+                   timeout, func.__name__, expected_return_value, result))
+        self.fail(msg)
+
+
+def wait_for_warmup_threads_to_finish():
+    """Will block and wait for any warmup threads to finish, until
+    timeout is exceeded.
+
+    This is required to get deterministic, synchronous behavior in tests.
+    """
+    timeout = 5.0
+    elapsed = 0.0
+
+    def warmup_threads_still_running():
+        return any('warmup' in t.getName() for t in threading.enumerate())
+
+    start = time.time()
+    while not elapsed > timeout and warmup_threads_still_running():
+        print "\nWaiting for a warmup thread to finish..."
+        time.sleep(0.1)
+        elapsed = time.time() - start
+
 
 class MonitorTestCase(TestCase, TCPHelper):
 
@@ -55,6 +93,8 @@ class MonitorTestCase(TestCase, TCPHelper):
         self.start_monitor_server()
 
     def tearDown(self):
+        wait_for_warmup_threads_to_finish()
+
         self.stop_monitor_server()
         instance_warmup_state['done'] = False
         instance_warmup_state['in_progress'] = False
@@ -73,6 +113,10 @@ MONITOR_FIXTURE = MonitorLayer()
 MONITOR_INTEGRATION_TESTING = IntegrationTesting(
     bases=(MONITOR_FIXTURE,),
     name='ftw.monitor:integration')
+
+MONITOR_ZSERVER_TESTING = FunctionalTesting(
+    bases=(MONITOR_FIXTURE, z2.ZSERVER_FIXTURE),
+    name="ftw.monitor:zserver")
 
 
 class WarmupInProgress(object):
