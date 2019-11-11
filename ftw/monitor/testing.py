@@ -6,7 +6,7 @@ from plone.app.testing import PLONE_FIXTURE
 from plone.app.testing import PloneSandboxLayer
 from plone.app.testing.layers import FunctionalTesting
 from plone.testing import z2
-from unittest2 import TestCase
+from unittest import TestCase
 from zope.configuration import xmlconfig
 from ZServer.datatypes import HTTPServerFactory
 from ZServer.medusa.http_server import http_server

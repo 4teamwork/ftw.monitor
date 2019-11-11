@@ -13,7 +13,7 @@ from ftw.monitor.testing import TCPHelper
 from ftw.monitor.testing import wait_for_warmup_threads_to_finish
 from ftw.monitor.warmup import instance_warmup_state
 from ftw.testbrowser import browsing
-from unittest2 import TestCase
+from unittest import TestCase
 from zope.processlifetime import DatabaseOpenedWithRoot
 import os
 

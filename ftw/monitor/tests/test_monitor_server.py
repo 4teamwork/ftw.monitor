@@ -13,7 +13,7 @@ from ftw.monitor.testing import OtherServerStub
 from ftw.monitor.testing import TCPHelper
 from ftw.monitor.testing import wait_for_warmup_threads_to_finish
 from ftw.monitor.testing import WarmupInProgress
-from unittest2 import TestCase
+from unittest import TestCase
 from zope.processlifetime import DatabaseOpenedWithRoot
 import time
 
