@@ -4,6 +4,7 @@ from ftw.monitor.autowarmup import autowarmup_enabled
 from zope.component import getUtilitiesFor
 from ZServer.datatypes import HTTPServerFactory
 from ZServer.medusa.http_server import http_server
+import os
 import time
 import zc.monitor
 import ZODB.ActivityMonitor
@@ -25,6 +26,12 @@ def initialize_monitor_server(opened_event):
     """Event handler for IDatabaseOpenedWithRoot that starts the monitor
     server on instance startup.
     """
+    config = getConfiguration()
+    instance_name = os.path.basename(config.instancehome)
+    # Never warm up or monitor server for our maintenance instance
+    if instance_name == 'instance0':
+        return
+
     global startup_time
     startup_time = time.time()
 
