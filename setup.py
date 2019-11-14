@@ -48,6 +48,7 @@ setup(
         'Plone',
         'setuptools',
         'plone.api',
+        'requests',
         'zc.monitor',
         'zc.z3monitor',
         'ZODB3',

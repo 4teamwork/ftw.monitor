@@ -19,7 +19,8 @@ def monitor(zope2Cmd, *args):
 
     Usage: bin/instance monitor <monitor_cmd>
     """
-    monitor_port = determine_monitor_port(zope2Cmd.options.configroot)
+    monitor_port = determine_monitor_port(zope2Cmd.options.configroot,
+                                          consider_factories=True)
 
     if args == ('',):
         content = 'help'

@@ -132,6 +132,24 @@ At this point, ``ftw.monitor`` does *not* yet automatically call this warmup
 view on instance startup. This can be achieved by using ``collective.warmup``
 and configuring it appropriately.
 
+
+Automatic Warmup
+----------------
+
+By default, ``ftw.monitor`` will automatically warm up a booting instance, by
+sending a request to the `@@warmup` view. The instance will be considered
+healthy (by the ``health_check`` command) once the warmup has been performed
+successfully.
+
+If this behavior is not desired, automatic warmup can be disabled by setting
+the ``FTW_MONITOR_AUTOWARMUP`` environment variable to ``0`` before starting
+the instance(s):
+
+```bash
+export FTW_MONITOR_AUTOWARMUP=0
+```
+
+
 HAProxy example
 ---------------
 
