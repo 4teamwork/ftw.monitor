@@ -128,11 +128,6 @@ indicate the instance as being healthy:
     Warmup in progress
 
 
-At this point, ``ftw.monitor`` does *not* yet automatically call this warmup
-view on instance startup. This can be achieved by using ``collective.warmup``
-and configuring it appropriately.
-
-
 Automatic Warmup
 ----------------
 
@@ -175,17 +170,52 @@ this backend to TCP mode. So the ``maintenance`` server in this example,
 which is an HTTP server, needs to have health checks turned off.
 
 
-collective.warmup example
--------------------------
+Switching to ftw.monitor
+------------------------
 
-If using `ftw-buildouts <https://github.com/4teamwork/ftw-buildouts/#warmup/>`_
-to configure ``collective.warmup``, the following configuration can be used:
+In order to switch to ``ftw.monitor`` for health monitoring, the following
+steps are necessary:
 
+- Configure your zope instance to only use one ZServer thread. ``ftw.monitor``
+  is intended for use in setups with one thread per instance.
+  Example using buildout and ``plone.recipe.zope2instance``:
 
-.. code:: ini
+  .. code:: ini
+  
+      [instance0]
+      zserver-threads = 1
 
-    [warmup-configuration]
-    base_path = /@@warmup
+- Remove any ``HttpOk`` plugins from your supervisor configuration. With only
+  one thread per instance, that approach to service monitoring can't work
+  any more, and *must* be disabled.
+
+  If you're extending from ``production.cfg`` and/or ``zeoclients/<n>.cfg``
+  from ``ftw-buildouts``, you can get rid of the ``HttpOk`` supervisor plugins
+  like this (after extending from one of these configs):
+
+  .. code:: ini
+  
+      [supervisor]
+      eventlisteners-httpok =
+
+- Remove ``collective.warmup`` (if present). Since ``ftw.monitor`` includes
+  its own auto-warmup logic, the use of ``collective.warmup`` is unnecessary
+  (or even detrimental).
+
+  If you're extending from ``warmup.cfg`` from
+  ``ftw-buildouts``, you can neutralize  ``collective.warmup`` with a section
+  like this (after extending from ``warmup.cfg``):
+
+  .. code:: ini
+  
+      [buildout]
+      warmup-parts =
+      warmup-eggs =
+      warmup-instance-env-vars =
+
+- Change your HAProxy health checks to TCP checks instead of HTTP. See the
+  section above for an example of an appropriate HAProxy configuration.
+
 
 
 Development
