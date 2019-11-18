@@ -162,6 +162,7 @@ a HAProxy TCP health check:
     backend plone03
         # ...
         option tcp-check
+        tcp-check connect
         tcp-check send health_check\r\n
         tcp-check expect string OK
 
