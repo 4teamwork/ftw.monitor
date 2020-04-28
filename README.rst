@@ -140,9 +140,9 @@ If this behavior is not desired, automatic warmup can be disabled by setting
 the ``FTW_MONITOR_AUTOWARMUP`` environment variable to ``0`` before starting
 the instance(s):
 
-```bash
-export FTW_MONITOR_AUTOWARMUP=0
-```
+.. code:: bash
+
+    export FTW_MONITOR_AUTOWARMUP=0
 
 
 HAProxy example
