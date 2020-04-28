@@ -13,6 +13,9 @@ the monitor port will always be picked automatically based on the instance's bas
 
 ``monitor_port = instance_port + 80``
 
+In addition, ``ftw.monitor`` also provides a ``perf_metrics`` command that
+allows to interrogate an instance for performance related metrics.
+
 
 .. contents:: Table of Contents
 
@@ -68,6 +71,7 @@ The monitor server can be inspected and tested using **netcat**:
       help -- Get help about server commands
       interactive -- Turn on monitor's interactive mode
       monitor -- Get general process info
+      perf_metrics -- Get performance related metrics
       quit -- Quit the monitor
       zeocache -- Get ZEO client cache statistics
       zeostatus -- Get ZEO client status information
@@ -143,6 +147,83 @@ the instance(s):
 .. code:: bash
 
     export FTW_MONITOR_AUTOWARMUP=0
+
+
+Performance Metrics
+-------------------
+
+The ``perf_metrics`` command can be used to query an instance for various
+metrics that are related to performance.
+
+Syntax: ``perf_metrics [dbname] [sampling-interval]``
+
+You can pass a database name, where "-" is an alias for the ``main`` database,
+which is the default. The sampling interval (specified in seconds)
+defaults to 5m, and affects DB statistics retrieved from the ZODB
+ActivityMonitor, specifically ``loads``, ``stores`` and ``connections``.
+
+The maximum history length (and therefore sampling interval) configured in
+the ActivityMonitor is 3600s in a stock installation.     
+
+The command will return the metrics as a JSON encoded string
+(*whitespace added for clarity*).
+
+.. code:: json
+
+    {
+        "instance": {
+            "uptime": 39
+        },
+        "cache": {
+            "size": 3212,
+            "ngsize": 1438,
+            "max_size": 30000
+        },
+        "db": {
+            "loads": 1114,
+            "stores": 28,
+            "connections": 459,
+            "conflicts": 7,
+            "unresolved_conflicts": 3,
+            "total_objs": 13336,
+            "size_in_bytes": 5796849
+        },
+        "memory": {
+            "rss": 312422400,
+            "uss": 298905600,
+            "pss": 310822823
+        }
+    }
+
+**instance**
+
+- ``uptime`` - Time since instance start (in seconds)
+
+**cache**
+
+- ``size`` - Number of objects in cache
+- ``ngsize`` - Number of non-ghost objects in cache
+- ``max_size`` - Cache size (in number of objects)
+
+**db**
+
+- ``loads`` - Number of object loads in sampling interval
+- ``stores`` - Number of object stores in sampling interval
+- ``connections`` - Number of connections in sampling interval
+- ``conflicts`` - Total number of conflicts since instance start
+- ``unresolved_conflicts`` - Total number of unresolved conflicts since instance start
+- ``total_objs`` - Total number of objects in the storage 
+- ``size_in_bytes`` - Size of the storage in bytes (so FileStorage's ``Data.fs``, usually. Excludes BlobStorage)
+
+.. note::
+    - loads, stores and connections are cumulative across all connections in the pool of that instance.
+    - total_objs and size_in_bytes may or may not be reported correctly when using ``RelStorage``, depending on the SQL adapter
+
+**memory**
+
+- ``rss`` - RSS (Resident Set Size) in bytes
+- ``uss`` - USS (`Unique Set Size`_) in bytes
+- ``pss`` - PSS (Proportional Set Size) in bytes (Linux only, ``-1`` on other platforms)
 
 
 HAProxy example
@@ -246,3 +327,5 @@ Copyright
 This package is copyright by `4teamwork <http://www.4teamwork.ch/>`_.
 
 ``ftw.monitor`` is licensed under GNU General Public License, version 2.
+
+.. _`Unique Set Size`: https://psutil.readthedocs.io/en/latest/#psutil.Process.memory_full_info
