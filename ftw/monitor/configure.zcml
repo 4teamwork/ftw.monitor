@@ -23,6 +23,12 @@
       />
 
   <utility
+      component=".perf_metrics.perf_metrics"
+      provides="zc.z3monitor.interfaces.IZ3MonitorPlugin"
+      name="perf_metrics"
+      />
+
+  <utility
       component=".warmup.warmup_state"
       provides="zc.z3monitor.interfaces.IZ3MonitorPlugin"
       name="warmup_state"
