@@ -1,17 +1,5 @@
 from ftw.monitor.server import determine_monitor_port
-import socket
-
-
-def netcat(hostname, port, content):
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect((hostname, port))
-    s.sendall(content)
-    while 1:
-        data = s.recv(1024)
-        if data == "":
-            break
-        print data.strip()
-    s.close()
+from ftw.monitor.utils import netcat
 
 
 def monitor(zope2Cmd, *args):
@@ -26,4 +14,5 @@ def monitor(zope2Cmd, *args):
         content = 'help'
     else:
         content = ' '.join(args)
-    netcat('127.0.0.1', int(monitor_port), '%s\n' % content)
+    reply = netcat('127.0.0.1', int(monitor_port), '%s\n' % content)
+    print reply
