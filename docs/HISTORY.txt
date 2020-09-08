@@ -2,10 +2,11 @@ Changelog
 =========
 
 
-1.1.1 (unreleased)
+1.2.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add script to dump perf_metrics for all instances in InfluxDB format.
+  [lgraf]
 
 
 1.1.0 (2020-04-30)

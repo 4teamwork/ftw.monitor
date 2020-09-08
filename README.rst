@@ -225,6 +225,7 @@ The command will return the metrics as a JSON encoded string
 - ``uss`` - USS (`Unique Set Size`_) in bytes
 - ``pss`` - PSS (Proportional Set Size) in bytes (Linux only, ``-1`` on other platforms)
 
+For easy ingestion into InfluxDB via Telegraf, performance metrics for all reachable instances can be dumped using the ``bin/dump-perf-metrics`` script. This script will collect metrics from all instances, and dump them in InfluxDB Line Protocol format.
 
 HAProxy example
 ---------------

@@ -1,7 +1,9 @@
 from ftw.monitor.utils import netcat
 from unittest import TestCase
+import socket
 import SocketServer
 import threading
+import time
 
 
 class TCPEchoHandler(SocketServer.BaseRequestHandler):
@@ -9,6 +11,8 @@ class TCPEchoHandler(SocketServer.BaseRequestHandler):
     def handle(self):
         data = self.request.recv(1024)
         response = "Received: %s" % data
+        if data == 'DELAY':
+            time.sleep(1)
         self.request.sendall(response)
 
 
@@ -34,3 +38,8 @@ class TestNetcatHelper(TestCase):
         msg = 'hello'
         reply = netcat(self.ip, self.port, msg)
         self.assertEqual('Received: %s' % msg, reply)
+
+    def test_accepts_timeout(self):
+        msg = 'DELAY'
+        with self.assertRaises(socket.timeout):
+            netcat(self.ip, self.port, msg, timeout=0.5)

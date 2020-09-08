@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import os
 
-version = '1.1.1.dev0'
+version = '1.2.0.dev0'
 
 tests_require = [
     'ftw.testing',
@@ -67,5 +67,8 @@ setup(
 
     [plone.recipe.zope2instance.ctl]
     monitor = ftw.monitor.command:monitor
+
+    [console_scripts]
+    dump-perf-metrics = ftw.monitor.command:dump_perf_metrics
     """,
 )

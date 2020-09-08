@@ -1,8 +1,10 @@
 import socket
 
 
-def netcat(hostname, port, content):
+def netcat(hostname, port, content, timeout=None):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    if timeout is not None:
+        s.settimeout(timeout)
     s.connect((hostname, port))
     s.sendall(content)
     reply = ''
