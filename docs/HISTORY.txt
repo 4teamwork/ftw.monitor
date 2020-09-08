@@ -2,7 +2,7 @@ Changelog
 =========
 
 
-1.2.0 (unreleased)
+1.2.0 (2020-09-08)
 ------------------
 
 - Add script to dump perf_metrics for all instances in InfluxDB format.
