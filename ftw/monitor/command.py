@@ -1,17 +1,7 @@
+from ftw.monitor.dump_metrics import dump_all_perf_metrics
+from ftw.monitor.dump_metrics import get_deployment_dir
 from ftw.monitor.server import determine_monitor_port
-import socket
-
-
-def netcat(hostname, port, content):
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect((hostname, port))
-    s.sendall(content)
-    while 1:
-        data = s.recv(1024)
-        if data == "":
-            break
-        print data.strip()
-    s.close()
+from ftw.monitor.utils import netcat
 
 
 def monitor(zope2Cmd, *args):
@@ -27,3 +17,11 @@ def monitor(zope2Cmd, *args):
     else:
         content = ' '.join(args)
     netcat('127.0.0.1', int(monitor_port), '%s\n' % content)
+
+
+def dump_perf_metrics():
+    """Collect and dump performance metrics for all instances in
+    InfluxDB line protocol format.
+    """
+    deployment_dir = get_deployment_dir()
+    print dump_all_perf_metrics(deployment_dir)
