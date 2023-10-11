@@ -1,3 +1,4 @@
+raise Exception('boom')
 from zope.i18nmessageid import MessageFactory
 
 
