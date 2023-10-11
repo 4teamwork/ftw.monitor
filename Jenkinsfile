@@ -35,7 +35,7 @@ pipeline {
         }
     }
     post {
-        failure {
+        always {
             script {
                 slackNotification()
             }
