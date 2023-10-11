@@ -14,23 +14,20 @@ pipeline {
     }
     stages {
         stage('Run Tests') {
-            parallel {
-                stage('test-plone-4.3.x') {
-                    agent {
-                        node {
-                            label '!django'
-                            customWorkspace "workspace/${JOB_NAME}/test-plone-4.3.x/${BUILD_NUMBER}"
-                        }
-                    }
-                    steps {
-                        allocatePorts()
-                        withChecks(name: 'test-plone-4.3.x') {
-                            sh "${JENKINS_BUILD} test-plone-4.3.x.cfg"
-                            publishChecks()
-                        }
+            stage('test-plone-4.3.x') {
+                agent {
+                    node {
+                        label '!django'
+                        customWorkspace "workspace/${JOB_NAME}/test-plone-4.3.x/${BUILD_NUMBER}"
                     }
                 }
-
+                steps {
+                    allocatePorts()
+                    withChecks(name: 'test-plone-4.3.x') {
+                        sh "${JENKINS_BUILD} test-plone-4.3.x.cfg"
+                        publishChecks()
+                    }
+                }
             }
         }
     }
