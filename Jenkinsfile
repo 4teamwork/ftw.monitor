@@ -40,10 +40,5 @@ pipeline {
                 slackNotification()
             }
         }
-        success {
-            publishChecks(
-              conclusion: 'SUCCESS'
-            )
-        }
     }
 }
